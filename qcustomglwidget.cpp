@@ -5,7 +5,11 @@
 #include <GL/glxew.h>
 #include <glm/vec3.hpp>
 #include "shaders.h"
-#include "vertices.h"
+#include "drawable.h"
+#include "point.h"
+#include "handle.h"
+#include "curvepiece.h"
+//#include "vertices.h"
 
 QCustomGLWidget::QCustomGLWidget(QWidget *parent)
     : QWidget{parent}
@@ -135,7 +139,37 @@ void QCustomGLWidget::initializeGL(){
     glXDestroyContext(m_display, m_glc);
     m_glc = glCtx;
 
-    init();
+    auto newPoint = std::make_shared<point>(0.75, 0.25);
+    auto newHandle = std::make_shared<handle>(newPoint, -0.5, -0.5);
+
+    auto newPoint2 = std::make_shared<point>(0.45, 0.75);
+    auto newHandle2 = std::make_shared<handle>(newPoint2, 0.75, 0.25);
+
+    auto newCurvePiece = std::make_shared<curvePiece>(newPoint, newHandle, newPoint2, newHandle2);
+
+    DrawableManager::insertItem(newPoint);
+    DrawableManager::insertItem(newPoint2);
+    DrawableManager::insertItem(newHandle);
+    DrawableManager::insertItem(newHandle2);
+    DrawableManager::insertItem(newCurvePiece);
+
+    auto newCurvePoint = std::make_shared<point>(0.45, 0.75);
+    auto newCurveHandle = std::make_shared<handle>(newCurvePoint, 0.75, 0.25);
+
+    auto newCurvePoint2 = std::make_shared<point>(-0.5, 0.25);
+    auto newCurveHandle2 = std::make_shared<handle>(newCurvePoint2, -0.5, 0.5);
+
+    auto newCurvePiece2 = std::make_shared<curvePiece>(newCurvePoint, newCurveHandle, newCurvePoint2, newCurveHandle2);
+
+    DrawableManager::insertItem(newCurvePoint);
+    DrawableManager::insertItem(newCurveHandle);
+    DrawableManager::insertItem(newCurvePoint2);
+    DrawableManager::insertItem(newCurveHandle2);
+    DrawableManager::insertItem(newCurvePiece2);
+
+    DrawableManager::init();
+//    init();
+
     setShaders();
 
 
@@ -170,7 +204,8 @@ void QCustomGLWidget::paintEvent(QPaintEvent *event){
     glClearColor(0.5f, 0.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    displayVertices();
+//    displayVertices();
+    DrawableManager::drawItems();
 
     glXSwapBuffers(m_display, m_win);
     glFlush();
@@ -186,7 +221,10 @@ void QCustomGLWidget::mouseReleaseEvent(QMouseEvent *event){
     float px = 2.0*(x/float(winRect.width())) - 1.0;
     float py = -(2.0*(y/float(winRect.height())) - 1.0);
 
-    insertNewDot(px, py);
+    auto newPoint = std::make_shared<point>(px, py);
+    DrawableManager::insertItem(newPoint);
+
+//    insertNewDot(px, py);
 //    displayVertices();
     update();
 

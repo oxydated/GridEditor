@@ -32,6 +32,14 @@ set(PROJECT_SOURCES
         shaders.h
         vertices.cpp
         vertices.h
+        drawable.cpp
+        drawable.h
+        point.cpp
+        point.h
+        handle.cpp
+        handle.h
+        curvepiece.cpp
+        curvepiece.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
