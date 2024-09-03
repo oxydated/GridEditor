@@ -28,6 +28,7 @@ protected:
     virtual void closeEvent(QCloseEvent *event);
     virtual void paintEvent(QPaintEvent *event);
     virtual void mouseReleaseEvent(QMouseEvent *event);
+    virtual void resizeEvent(QResizeEvent *event);
 
     void initializeGL();
 

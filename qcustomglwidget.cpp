@@ -1,4 +1,6 @@
 #include <QMouseEvent>
+#include <QApplication>
+#include <QSize>
 #include "qcustomglwidget.h"
 #include <stdio.h>
 #include <GL/glew.h>
@@ -9,7 +11,6 @@
 #include "point.h"
 #include "handle.h"
 #include "curvepiece.h"
-//#include "vertices.h"
 
 QCustomGLWidget::QCustomGLWidget(QWidget *parent)
     : QWidget{parent}
@@ -140,10 +141,10 @@ void QCustomGLWidget::initializeGL(){
     m_glc = glCtx;
 
     auto newPoint = std::make_shared<point>(0.75, 0.25);
-    auto newHandle = std::make_shared<handle>(newPoint, -0.5, -0.5);
+    auto newHandle = std::make_shared<handle>(newPoint, -0.5, -0.5, true);
 
-    auto newPoint2 = std::make_shared<point>(0.45, 0.75);
-    auto newHandle2 = std::make_shared<handle>(newPoint2, 0.75, 0.25);
+    auto newPoint2 = std::make_shared<point>(0.45, 0.15);
+    auto newHandle2 = std::make_shared<handle>(newPoint2, -0.25, -0.75, false);
 
     auto newCurvePiece = std::make_shared<curvePiece>(newPoint, newHandle, newPoint2, newHandle2);
 
@@ -153,11 +154,11 @@ void QCustomGLWidget::initializeGL(){
     DrawableManager::insertItem(newHandle2);
     DrawableManager::insertItem(newCurvePiece);
 
-    auto newCurvePoint = std::make_shared<point>(0.45, 0.75);
-    auto newCurveHandle = std::make_shared<handle>(newCurvePoint, 0.75, 0.25);
+    auto newCurvePoint = std::make_shared<point>(0.45, 0.15);
+    auto newCurveHandle = std::make_shared<handle>(newCurvePoint, -0.25, -0.75, true);
 
     auto newCurvePoint2 = std::make_shared<point>(-0.5, 0.25);
-    auto newCurveHandle2 = std::make_shared<handle>(newCurvePoint2, -0.5, 0.5);
+    auto newCurveHandle2 = std::make_shared<handle>(newCurvePoint2, -0.5*5, 0.5*5, false);
 
     auto newCurvePiece2 = std::make_shared<curvePiece>(newCurvePoint, newCurveHandle, newCurvePoint2, newCurveHandle2);
 
@@ -167,14 +168,31 @@ void QCustomGLWidget::initializeGL(){
     DrawableManager::insertItem(newCurveHandle2);
     DrawableManager::insertItem(newCurvePiece2);
 
+    auto newCurvePoint3 = std::make_shared<point>(-0.5, 0.25);
+    auto newCurveHandle3 = std::make_shared<handle>(newCurvePoint2, -0.5*5, 0.5*5, true);
+
+    auto newPoint3 = std::make_shared<point>(0.75, 0.25);
+    auto newHandle3 = std::make_shared<handle>(newPoint, -0.5, -0.5, false);
+
+    auto newCurvePiece3 = std::make_shared<curvePiece>(newCurvePoint3, newCurveHandle3, newPoint3, newHandle3);
+
+    DrawableManager::insertItem(newCurvePoint3);
+    DrawableManager::insertItem(newCurveHandle3);
+    DrawableManager::insertItem(newPoint3);
+    DrawableManager::insertItem(newHandle3);
+    DrawableManager::insertItem(newCurvePiece3);
+
     DrawableManager::init();
-//    init();
 
     setShaders();
 
-
     QRect winRect = geometry();
-    glViewport(0, 0, winRect.width(), winRect.height());
+    int width = winRect.width();
+    int height = winRect.height();
+    int min = height < width? height: width;
+    int x = (width - min)/2;
+    int y = (height - min)/2;
+    glViewport(x, y, min, min);
 
     glClearColor(0.0f, 0.0f, 0.5f, 1.0f);
     glClearDepth(1.0);
@@ -204,12 +222,10 @@ void QCustomGLWidget::paintEvent(QPaintEvent *event){
     glClearColor(0.5f, 0.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-//    displayVertices();
     DrawableManager::drawItems();
 
     glXSwapBuffers(m_display, m_win);
     glFlush();
-    //QWidget::paintEvent(event);
 }
 
 
@@ -218,15 +234,30 @@ void QCustomGLWidget::mouseReleaseEvent(QMouseEvent *event){
     qreal y = event->position().ry();
 
     QRect winRect = geometry();
-    float px = 2.0*(x/float(winRect.width())) - 1.0;
-    float py = -(2.0*(y/float(winRect.height())) - 1.0);
+    int width = winRect.width();
+    int height = winRect.height();
+
+    y = float(height) - y;
+
+    int min = height < width? height: width;
+
+    float px = (x - float(width)/2.0) * (2.0/float(min));
+    float py = (y - float(height)/2.0) * (2.0/float(min));
 
     auto newPoint = std::make_shared<point>(px, py);
     DrawableManager::insertItem(newPoint);
 
-//    insertNewDot(px, py);
-//    displayVertices();
     update();
 
     return;
+}
+
+void QCustomGLWidget::resizeEvent(QResizeEvent *event){
+    QRect winRect = geometry();
+    int width = winRect.width();
+    int height = winRect.height();
+    int min = height < width? height: width;
+    int x = (width - min)/2;
+    int y = (height - min)/2;
+    glViewport(x, y, min, min);
 }

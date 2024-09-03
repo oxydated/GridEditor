@@ -15,6 +15,8 @@ void setVertexShader() {
     vs << "in  vec3 in_Color;" << "\n";
     vs << "out vec3 ex_Color;" << "\n";
 
+//    vs << "layout(location = 4) uniform vec2 screenOffset;" << "\n";
+
     vs << "void main(void)" << "\n";
     vs << "{" << "\n";
     vs << "    ex_Color = in_Color;" << "\n";

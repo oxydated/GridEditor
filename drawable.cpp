@@ -10,9 +10,11 @@ bool DrawableManager::initialized = false;
 
 std::vector<float> DrawableManager::pointsToDraw = std::vector<float>();
 std::vector<float> DrawableManager::linesToDraw = std::vector<float>();
+std::vector<float> DrawableManager::curvesToDraw = std::vector<float>();
 
 unsigned int pointsArrayObj = -1;
 unsigned int linesArrayObj = -1;
+unsigned int curvesArrayObj = -1;
 
 unsigned int pointsVertexBuffer = -1;
 unsigned int pointsIndexBuffer = -1;
@@ -20,23 +22,30 @@ unsigned int pointsIndexBuffer = -1;
 unsigned int linesVertexBuffer = -1;
 unsigned int linesIndexBuffer = -1;
 
+unsigned int curvesVertexBuffer = -1;
+unsigned int curvesIndexBuffer = -1;
+
+
 void DrawableManager::insertItem(DrawableItemPtr item){
     itemsToDraw.push_back(item);
 }
 
 void DrawableManager::init(){
     glPointSize(5);
-    unsigned int vertexArrayObjID[2];
-    glGenVertexArrays(2, &vertexArrayObjID[0]);
+    unsigned int vertexArrayObjID[3];
+    glGenVertexArrays(3, &vertexArrayObjID[0]);
     pointsArrayObj = vertexArrayObjID[0];
     linesArrayObj = vertexArrayObjID[1];
+    curvesArrayObj = vertexArrayObjID[2];
 
-    unsigned int vertexBufferObjID[4];
-    glGenBuffers(4, vertexBufferObjID);
+    unsigned int vertexBufferObjID[6];
+    glGenBuffers(6, vertexBufferObjID);
     pointsVertexBuffer = vertexBufferObjID[0];
     pointsIndexBuffer = vertexBufferObjID[1];
     linesVertexBuffer = vertexBufferObjID[2];
     linesIndexBuffer = vertexBufferObjID[3];
+    curvesVertexBuffer = vertexBufferObjID[4];
+    curvesIndexBuffer = vertexBufferObjID[5];
 }
 
 void DrawableManager::drawPoint(float x, float y){
@@ -46,12 +55,21 @@ void DrawableManager::drawPoint(float x, float y){
 }
 
 void DrawableManager::drawLine(float sx, float sy, float ex, float ey){
-    linesToDraw.push_back(sx);
-    linesToDraw.push_back(sy);
-    linesToDraw.push_back(0.0);
-    linesToDraw.push_back(ex);
-    linesToDraw.push_back(ey);
-    linesToDraw.push_back(0.0);
+    drawSegment(sx, sy, ex, ey, false);
+}
+
+void DrawableManager::drawCurve(float sx, float sy, float ex, float ey){
+    drawSegment(sx, sy, ex, ey, true);
+}
+
+void DrawableManager::drawSegment(float sx, float sy, float ex, float ey, bool isCurve){
+    auto &segmentToDraw = isCurve ? curvesToDraw : linesToDraw;
+    segmentToDraw.push_back(sx);
+    segmentToDraw.push_back(sy);
+    segmentToDraw.push_back(0.0);
+    segmentToDraw.push_back(ex);
+    segmentToDraw.push_back(ey);
+    segmentToDraw.push_back(0.0);
 }
 
 void DrawableManager::drawItems(){
@@ -68,7 +86,8 @@ void DrawableManager::drawItems(){
     glVertexAttrib3f((GLuint)1, 1.0, 0.0, 0.0); // set constant color attribute
     glDrawArrays(GL_POINTS, 0, pointsToDraw.size()/3);
 
-    glBindVertexArray(linesArrayObj);
+    glBindVertexArray(linesArrayObj);    
+    glLineWidth(1.0);
 
     glBindBuffer(GL_ARRAY_BUFFER, linesVertexBuffer);
     glBufferData(GL_ARRAY_BUFFER, linesToDraw.size() * sizeof(GLfloat), linesToDraw.data(), GL_DYNAMIC_DRAW);
@@ -77,4 +96,15 @@ void DrawableManager::drawItems(){
 
     glVertexAttrib3f((GLuint)1, 0.0, 1.0, 1.0); // set constant color attribute
     glDrawArrays(GL_LINES, 0, linesToDraw.size()/6);
+
+    glBindVertexArray(curvesArrayObj);
+    glLineWidth(6.0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, curvesVertexBuffer);
+    glBufferData(GL_ARRAY_BUFFER, curvesToDraw.size() * sizeof(GLfloat), curvesToDraw.data(), GL_DYNAMIC_DRAW);
+    glVertexAttribPointer((GLuint)0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttrib3f((GLuint)1, 1.0, 1.0, 0.0); // set constant color attribute
+    glDrawArrays(GL_LINES, 0, curvesToDraw.size()/6);
 }

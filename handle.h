@@ -7,7 +7,7 @@
 class handle: public DrawableItem
 {
 public:
-    handle(std::shared_ptr<point> p, float x, float y);
+    handle(std::shared_ptr<point> p, float x, float y, bool isLastArg);
 
     float getPosX();
     float getPosY();
@@ -21,6 +21,7 @@ private:
     float vecX;
     float vecY;
     std::shared_ptr<point> ori;
+    bool isLast;
 };
 
 #endif // HANDLE_H

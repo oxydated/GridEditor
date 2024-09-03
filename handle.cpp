@@ -1,16 +1,17 @@
 #include "handle.h"
 
-handle::handle(std::shared_ptr<point> p, float x, float y):
+handle::handle(std::shared_ptr<point> p, float x, float y, bool isLastArg):
     vecX(x),
     vecY(y),
-    ori(p)
+    ori(p),
+    isLast(isLastArg)
 {}
 
 float handle::getPosX(){
-    return vecX + ori->getPosX();
+    return (isLast? -vecX : vecX) + ori->getPosX();
 }
 float handle::getPosY(){
-    return vecY + ori->getPosY();
+    return (isLast? -vecY : vecY) + ori->getPosY();
 }
 
 float handle::getVecX(){

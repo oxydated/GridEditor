@@ -40,6 +40,8 @@ set(PROJECT_SOURCES
         handle.h
         curvepiece.cpp
         curvepiece.h
+        curvebuilder.cpp
+        curvebuilder.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

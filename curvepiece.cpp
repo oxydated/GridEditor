@@ -34,7 +34,7 @@ void curvePiece::draw(){
         float sy = evaluateY(a);
         float ex = evaluateX(b);
         float ey = evaluateY(b);
-        DrawableManager::drawLine(sx, sy, ex, ey);
+        DrawableManager::drawCurve(sx, sy, ex, ey);
         a = b;
     }
 }
