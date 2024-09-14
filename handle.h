@@ -9,6 +9,8 @@ class handle: public DrawableItem
 public:
     handle(std::shared_ptr<point> p, float x, float y, bool isLastArg);
 
+    handle(std::shared_ptr<point> p, std::shared_ptr<point> h, bool isLastArg);
+
     float getPosX();
     float getPosY();
 
@@ -16,6 +18,12 @@ public:
     float getVecY();
 
     void draw() override;
+
+    bool willDrag(float x, float y) override;
+
+    void keepDragging(float x, float y) override;
+
+    void dragRelease(float x, float y) override;
 
 private:
     float vecX;

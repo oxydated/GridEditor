@@ -42,6 +42,10 @@ set(PROJECT_SOURCES
         curvepiece.h
         curvebuilder.cpp
         curvebuilder.h
+        mathtools.cpp
+        mathtools.h
+        draggable.cpp
+        draggable.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

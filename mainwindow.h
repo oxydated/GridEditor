@@ -21,6 +21,8 @@ public:
     std::shared_ptr<QStandardItem> item1;
     std::shared_ptr<QStandardItem> item2;
 
+    void on_close_curve();
+
 
 private:
     Ui::MainWindow *ui;
@@ -28,5 +30,7 @@ private:
 protected:
     virtual void closeEvent(QCloseEvent *event);
 
+private slots:
+    void on_pushButton_clicked();
 };
 #endif // MAINWINDOW_H

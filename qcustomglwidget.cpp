@@ -11,6 +11,8 @@
 #include "point.h"
 #include "handle.h"
 #include "curvepiece.h"
+#include "curvebuilder.h"
+#include "mathtools.h"
 
 QCustomGLWidget::QCustomGLWidget(QWidget *parent)
     : QWidget{parent}
@@ -19,6 +21,14 @@ QCustomGLWidget::QCustomGLWidget(QWidget *parent)
 }
 
 void QCustomGLWidget::initializeGL(){
+//    auto cRoots = cubicRoots(-1, 0.25, -3, 0.75);
+
+//    auto fRoots = fourthRoots(1, -1.65, 0.9125, -0.196875, 0.0140625);
+//    auto fRoots = fourthRoots(1, -1.25, 0.375, 0, 0);
+
+    auto fifRoots = fifthRoots(-262.25, 800., -915., 485.175, -116.75, 9.775);
+
+    auto nearest = nearestPointInCurve(1, -2, 1.5, -3, 2, -2, 0, -1, 1.1, -1.9);
 
     setAttribute(Qt::WA_PaintOnScreen, true);
     setAttribute(Qt::WA_OpaquePaintEvent, true);
@@ -140,59 +150,35 @@ void QCustomGLWidget::initializeGL(){
     glXDestroyContext(m_display, m_glc);
     m_glc = glCtx;
 
-    auto newPoint = std::make_shared<point>(0.75, 0.25);
-    auto newHandle = std::make_shared<handle>(newPoint, -0.5, -0.5, true);
+//    float x0 = 0.75;
+//    float y0 = 0.25;
 
-    auto newPoint2 = std::make_shared<point>(0.45, 0.15);
-    auto newHandle2 = std::make_shared<handle>(newPoint2, -0.25, -0.75, false);
+//    float x3 = 0.95;
+//    float y3 = 0.05;
 
-    auto newCurvePiece = std::make_shared<curvePiece>(newPoint, newHandle, newPoint2, newHandle2);
+//    float vx1 = (x3 - x0);
+//    float vy1 = (y3 - y0);
 
-    DrawableManager::insertItem(newPoint);
-    DrawableManager::insertItem(newPoint2);
-    DrawableManager::insertItem(newHandle);
-    DrawableManager::insertItem(newHandle2);
-    DrawableManager::insertItem(newCurvePiece);
+//    float vx2 = vx1;
+//    float vy2 = vy1;
 
-    auto newCurvePoint = std::make_shared<point>(0.45, 0.15);
-    auto newCurveHandle = std::make_shared<handle>(newCurvePoint, -0.25, -0.75, true);
+//    auto newPoint = std::make_shared<point>(x0, y0);
 
-    auto newCurvePoint2 = std::make_shared<point>(-0.5, 0.25);
-    auto newCurveHandle2 = std::make_shared<handle>(newCurvePoint2, -0.5*5, 0.5*5, false);
+//    auto newPoint2 = std::make_shared<point>(x3, y3);
 
-    auto newCurvePiece2 = std::make_shared<curvePiece>(newCurvePoint, newCurveHandle, newCurvePoint2, newCurveHandle2);
+//    float x1 = (-vx1 + 3*x0)/3.;
+//    float y1 = (-vy1 + 3*y0)/3.;
+//    float x2 = (vx2 + 3*x3)/3.;
+//    float y2 = (vy2 + 3*y3)/3.;
 
-    DrawableManager::insertItem(newCurvePoint);
-    DrawableManager::insertItem(newCurveHandle);
-    DrawableManager::insertItem(newCurvePoint2);
-    DrawableManager::insertItem(newCurveHandle2);
-    DrawableManager::insertItem(newCurvePiece2);
+//    auto newpiece2 = std::make_shared<curvePiece>(newPoint, x1, y1, x2, y2, newPoint2);
 
-    auto newCurvePoint3 = std::make_shared<point>(-0.5, 0.25);
-    auto newCurveHandle3 = std::make_shared<handle>(newCurvePoint2, -0.5*5, 0.5*5, true);
-
-    auto newPoint3 = std::make_shared<point>(0.75, 0.25);
-    auto newHandle3 = std::make_shared<handle>(newPoint, -0.5, -0.5, false);
-
-    auto newCurvePiece3 = std::make_shared<curvePiece>(newCurvePoint3, newCurveHandle3, newPoint3, newHandle3);
-
-    DrawableManager::insertItem(newCurvePoint3);
-    DrawableManager::insertItem(newCurveHandle3);
-    DrawableManager::insertItem(newPoint3);
-    DrawableManager::insertItem(newHandle3);
-    DrawableManager::insertItem(newCurvePiece3);
+//    newpiece2->draw();
 
     DrawableManager::init();
 
     setShaders();
-
-    QRect winRect = geometry();
-    int width = winRect.width();
-    int height = winRect.height();
-    int min = height < width? height: width;
-    int x = (width - min)/2;
-    int y = (height - min)/2;
-    glViewport(x, y, min, min);
+    updateViewport();
 
     glClearColor(0.0f, 0.0f, 0.5f, 1.0f);
     glClearDepth(1.0);
@@ -221,43 +207,93 @@ void QCustomGLWidget::paintEvent(QPaintEvent *event){
 
     glClearColor(0.5f, 0.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+for(int i = 0; i < 2; i++){
+    DrawableManager::Update();
     DrawableManager::drawItems();
-
+}
     glXSwapBuffers(m_display, m_win);
-    glFlush();
+    glFinish();
 }
 
+void QCustomGLWidget::mouseMoveEvent(QMouseEvent *event){
+    if(event->buttons() == Qt::RightButton){
+        qreal x = event->position().rx();
+        qreal y = event->position().ry();
+        auto pointXY = convertCoordinates(x, y);
+        DragManager::onMouseMove(pointXY[0], pointXY[1]);
+        update();
+    }
+}
+
+void QCustomGLWidget::mousePressEvent(QMouseEvent *event){
+    if(event->button() == Qt::RightButton){
+        qreal x = event->position().rx();
+        qreal y = event->position().ry();
+        auto pointXY = convertCoordinates(x, y);
+        DragManager::onMouseDown(pointXY[0], pointXY[1]);
+        update();
+    }
+}
 
 void QCustomGLWidget::mouseReleaseEvent(QMouseEvent *event){
-    qreal x = event->position().rx();
-    qreal y = event->position().ry();
+    if(event->button() == Qt::LeftButton){
 
+        qreal x = event->position().rx();
+        qreal y = event->position().ry();
+
+        auto pointXY = convertCoordinates(x, y);
+
+        if(CurveBuilder::willBuildCurve()){
+            CurveBuilder::onClick(pointXY[0], pointXY[1], this);
+            update();
+        }
+    }
+
+    if(event->button() == Qt::RightButton){
+        qreal x = event->position().rx();
+        qreal y = event->position().ry();
+        auto pointXY = convertCoordinates(x, y);
+        DragManager::onMouseUp(pointXY[0], pointXY[1]);
+        update();
+    }
+
+    return;
+}
+
+void QCustomGLWidget::keyPressEvent(QKeyEvent *event){
+    if(event->key() == Qt::Key_Escape){
+        CurveBuilder::cancelBuildCurve();
+    }
+}
+
+void QCustomGLWidget::resizeEvent(QResizeEvent *event){
+    updateViewport();
+}
+
+void QCustomGLWidget::updateViewport(){
+    QRect winRect = geometry();
+    int width = winRect.width();
+    int height = winRect.height();
+    int max = height > width? height: width;
+    int x = (width - max)/2;
+    int y = (height - max)/2;
+    glViewport(x, y, max, max);
+
+    auto ori = convertCoordinates(0., 0.);
+    auto dest = convertCoordinates(0., 10.);
+    DrawableManager::setMinDistance(std::sqrt(std::pow(dest[0] - ori[0],2) + std::pow(dest[1] - ori[1],2)));
+}
+
+std::array<float, 2> QCustomGLWidget::convertCoordinates(float x, float y){
     QRect winRect = geometry();
     int width = winRect.width();
     int height = winRect.height();
 
     y = float(height) - y;
 
-    int min = height < width? height: width;
+    int max = height > width? height: width;
 
-    float px = (x - float(width)/2.0) * (2.0/float(min));
-    float py = (y - float(height)/2.0) * (2.0/float(min));
-
-    auto newPoint = std::make_shared<point>(px, py);
-    DrawableManager::insertItem(newPoint);
-
-    update();
-
-    return;
-}
-
-void QCustomGLWidget::resizeEvent(QResizeEvent *event){
-    QRect winRect = geometry();
-    int width = winRect.width();
-    int height = winRect.height();
-    int min = height < width? height: width;
-    int x = (width - min)/2;
-    int y = (height - min)/2;
-    glViewport(x, y, min, min);
+    float px = (x - float(width)/2.0) * (2.0/float(max));
+    float py = (y - float(height)/2.0) * (2.0/float(max));
+    return {px, py};
 }

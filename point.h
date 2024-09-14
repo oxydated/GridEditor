@@ -13,6 +13,12 @@ public:
 
     void draw() override;
 
+    virtual bool willDrag(float x, float y) override;
+
+    virtual void keepDragging(float x, float y) override;
+
+    virtual void dragRelease(float x, float y) override;
+
 private:
     float posX;
     float posY;

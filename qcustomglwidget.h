@@ -13,7 +13,6 @@
 #define GLX_CONTEXT_MINOR_VERSION_ARB 0x2092
 
 typedef GLXContext (*glXCreateContextAttribsARBProc)(Display*, GLXFBConfig, GLXContext, Bool, const int*);
-//glXCreateContextAttribsARBProc glXCreateContextAttribsARB;
 
 class QCustomGLWidget : public QWidget
 {
@@ -28,15 +27,26 @@ protected:
     virtual void closeEvent(QCloseEvent *event);
     virtual void paintEvent(QPaintEvent *event);
     virtual void mouseReleaseEvent(QMouseEvent *event);
+    virtual void mousePressEvent(QMouseEvent *event);
+    virtual void mouseMoveEvent(QMouseEvent *event);
+    void keyPressEvent(QKeyEvent *event);
     virtual void resizeEvent(QResizeEvent *event);
 
     void initializeGL();
 
 private:
+    void zoom(float x, float y);
+    void updateViewport();
+    std::array<float, 2> convertCoordinates(float x, float y);
+
     Display* m_display;
 
     Window m_win;
     GLXContext m_glc;
+
+    float screenCenterX;
+    float screenCenterY;
+    float zoomFactor;
 
 };
 
