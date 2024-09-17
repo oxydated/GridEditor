@@ -11,6 +11,11 @@ class DrawableItem: public std::enable_shared_from_this<DrawableItem>, public Dr
 {
 public:
     virtual void draw() = 0;
+    void setIndex(int argIndex);
+
+protected:
+    int index {-1};
+    bool firstDraw {true};
 };
 typedef std::shared_ptr<DrawableItem> DrawableItemPtr;
 
@@ -23,9 +28,9 @@ public:
     static void Update();
     static void drawItems();
 
-    static void drawPoint(float x, float y);
-    static void drawLine(float sx, float sy, float ex, float ey);
-    static void drawCurve(float sx, float sy, float ex, float ey);
+    static int drawPoint(float x, float y, int offset = -1);
+    static int drawLine(float sx, float sy, float ex, float ey, int offset = -1);
+    static int drawCurve(float sx, float sy, float ex, float ey, int offset = -1);
 
     static void setMinDistance(float d);
     static float getMinDistance();
@@ -41,7 +46,7 @@ private:
     static std::vector<float> linesToDraw;
     static std::vector<float> curvesToDraw;
 
-    static void drawSegment(float sx, float sy, float ex, float ey, bool isCurve);
+    static int drawSegment(float sx, float sy, float ex, float ey, bool isCurve, int offset = -1);
 
     static float minDistance;
     static bool willUpdate;

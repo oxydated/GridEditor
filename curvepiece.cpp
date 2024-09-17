@@ -13,20 +13,6 @@ curvePiece::curvePiece(
 {}
 
 
-//    auto newPoint = std::make_shared<point>(0.75, 0.25);
-//    auto newHandle = std::make_shared<handle>(newPoint, -0.5, -0.5, true);
-
-//    auto newPoint2 = std::make_shared<point>(0.45, 0.15);
-//    auto newHandle2 = std::make_shared<handle>(newPoint2, -0.25, -0.75, false);
-
-//    auto newCurvePiece = std::make_shared<curvePiece>(newPoint, newHandle, newPoint2, newHandle2);
-
-//    DrawableManager::insertItem(newPoint);
-//    DrawableManager::insertItem(newPoint2);
-//    DrawableManager::insertItem(newHandle);
-//    DrawableManager::insertItem(newHandle2);
-//    DrawableManager::insertItem(newCurvePiece);
-
 curvePiece::curvePiece(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3):
     sPoint(std::make_shared<point>(x0, y0)),
     sHandle(std::make_shared<handle>(sPoint, std::make_shared<point>(x1, y1), false)),
@@ -107,13 +93,24 @@ void curvePiece::setToDrag(){
 void curvePiece::draw(){
     float a = 0;
     int steps = 25;
+
+    bool firstDraw = (index == -1);
+
     for(int i = 0; i < steps; i++){
         float b = a + 1./float(steps);
         float sx = evaluateX(a);
         float sy = evaluateY(a);
         float ex = evaluateX(b);
         float ey = evaluateY(b);
-        DrawableManager::drawCurve(sx, sy, ex, ey);
+
+        if(firstDraw){
+            int tempIndex = DrawableManager::drawCurve(sx, sy, ex, ey);
+            if(i == 0){
+                index = tempIndex;
+            }
+        } else {
+            DrawableManager::drawCurve(sx, sy, ex, ey, index + i * 6);
+        }
         a = b;
     }
     sPoint->draw();

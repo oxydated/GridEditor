@@ -1,4 +1,5 @@
 #include "handle.h"
+#include <cmath>
 
 handle::handle(std::shared_ptr<point> p, float x, float y, bool isLastArg):
     ori(p),
@@ -50,16 +51,27 @@ float handle::getVecY(){
 }
 
 void handle::draw(){
-    DrawableManager::drawPoint(getPosX(), getPosY());
-    DrawableManager::drawLine(ori->getPosX(), ori->getPosY(), getPosX(), getPosY());
+
+    if(index == -1){
+        index = DrawableManager::drawPoint(getPosX(), getPosY());
+        segmentIndex = DrawableManager::drawLine(ori->getPosX(), ori->getPosY(), getPosX(), getPosY());
+    } else {
+        DrawableManager::drawPoint(getPosX(), getPosY(), index);
+        DrawableManager::drawLine(ori->getPosX(), ori->getPosY(), getPosX(), getPosY(), segmentIndex);
+    }
 }
 
 bool handle::willDrag(float x, float y) {
-    return false;
+
+    float dist = std::sqrt(std::pow(getPosX() - x,2) + std::pow(getPosY() - y,2));
+
+    return dist < DrawableManager::getMinDistance();
 }
 
 void handle::keepDragging(float x, float y) {
-
+    vecX = x - ori->getPosX();
+    vecY = y - ori->getPosY();
+    DrawableManager::setToUpdate();
 }
 
 void handle::dragRelease(float x, float y) {

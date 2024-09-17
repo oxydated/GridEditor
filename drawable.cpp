@@ -30,6 +30,10 @@ unsigned int curvesVertexBuffer = -1;
 unsigned int curvesIndexBuffer = -1;
 
 
+void DrawableItem::setIndex(int argIndex){
+    index = argIndex;
+}
+
 void DrawableManager::insertItem(DrawableItemPtr item){
     itemsToDraw.push_back(item);
     setToUpdate();
@@ -53,28 +57,49 @@ void DrawableManager::init(){
     curvesIndexBuffer = vertexBufferObjID[5];
 }
 
-void DrawableManager::drawPoint(float x, float y){
-    pointsToDraw.push_back(x);
-    pointsToDraw.push_back(y);
-    pointsToDraw.push_back(0.0);
+int DrawableManager::drawPoint(float x, float y, int offset){
+    if(offset == -1){
+        int newOffSet = pointsToDraw.size();
+        pointsToDraw.push_back(x);
+        pointsToDraw.push_back(y);
+        pointsToDraw.push_back(0.0);
+        return newOffSet;
+    } else {
+        pointsToDraw[offset] = x;
+        pointsToDraw[offset + 1] = y;
+        pointsToDraw[offset + 2] = 0.0;
+        return offset;
+    }
 }
 
-void DrawableManager::drawLine(float sx, float sy, float ex, float ey){
-    drawSegment(sx, sy, ex, ey, false);
+int DrawableManager::drawLine(float sx, float sy, float ex, float ey, int offset){
+    return drawSegment(sx, sy, ex, ey, false, offset);
 }
 
-void DrawableManager::drawCurve(float sx, float sy, float ex, float ey){
-    drawSegment(sx, sy, ex, ey, true);
+int DrawableManager::drawCurve(float sx, float sy, float ex, float ey, int offset){
+    return drawSegment(sx, sy, ex, ey, true, offset);
 }
 
-void DrawableManager::drawSegment(float sx, float sy, float ex, float ey, bool isCurve){
+int DrawableManager::drawSegment(float sx, float sy, float ex, float ey, bool isCurve, int offset){
     auto &segmentToDraw = isCurve ? curvesToDraw : linesToDraw;
-    segmentToDraw.push_back(sx);
-    segmentToDraw.push_back(sy);
-    segmentToDraw.push_back(0.0);
-    segmentToDraw.push_back(ex);
-    segmentToDraw.push_back(ey);
-    segmentToDraw.push_back(0.0);
+    if(offset == -1){
+        int newOffSet = segmentToDraw.size();
+        segmentToDraw.push_back(sx);
+        segmentToDraw.push_back(sy);
+        segmentToDraw.push_back(0.0);
+        segmentToDraw.push_back(ex);
+        segmentToDraw.push_back(ey);
+        segmentToDraw.push_back(0.0);
+        return newOffSet;
+    } else {
+        segmentToDraw[offset] = sx;
+        segmentToDraw[offset + 1] = sy;
+        segmentToDraw[offset + 2] = 0.0;
+        segmentToDraw[offset + 3] = ex;
+        segmentToDraw[offset + 4] = ey;
+        segmentToDraw[offset + 5] = 0.0;
+        return offset;
+    }
 }
 
 void DrawableManager::setMinDistance(float d){

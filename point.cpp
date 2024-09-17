@@ -14,7 +14,11 @@ float point::getPosY(){
 }
 
 void point::draw(){
-    DrawableManager::drawPoint(posX, posY);
+    if(index == -1){
+        index = DrawableManager::drawPoint(posX, posY);
+    } else {
+        DrawableManager::drawPoint(posX, posY, index);
+    }
 }
 
 bool point::willDrag(float x, float y) {

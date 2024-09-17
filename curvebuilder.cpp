@@ -48,6 +48,7 @@ void CurveBuilder::buildPiece(float x, float y){
 
         auto newpiece = std::make_shared<curvePiece>(points.back(), x1, y1, x2, y2, newPoint);
         newpiece->setToDraw();
+        newpiece->setToDrag();
         pieces.push_back(newpiece);
     } else {
         auto firstPoint = pieces.back()->point3();

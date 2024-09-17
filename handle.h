@@ -30,6 +30,7 @@ private:
     float vecY;
     std::shared_ptr<point> ori;
     bool isLast;
+    int segmentIndex {-1};
 };
 
 #endif // HANDLE_H
