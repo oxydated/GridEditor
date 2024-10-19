@@ -1,27 +1,40 @@
 #include <GL/glew.h>
 #include <sstream>
 #include <string>
+#include <fstream>
 
 std::string fragmentShaderString;
 std::string vertexShaderString;
 
 GLuint shaderProgram = -1;
 
+GLint ProjLocation = -2;
+GLint ViewLocation = -2;
+GLint WorldLocation = -2;
+
+
 void setVertexShader() {
     std::stringstream vs;
-    vs << "#version 130" << "\n";
+//    vs << "#version 130" << "\n";
 
-    vs << "in  vec3 in_Position;" << "\n";
-    vs << "in  vec3 in_Color;" << "\n";
-    vs << "out vec3 ex_Color;" << "\n";
+//    vs << "in  vec3 in_Position;" << "\n";
+//    vs << "in  vec3 in_Color;" << "\n";
+//    vs << "out vec3 ex_Color;" << "\n";
 
-//    vs << "layout(location = 4) uniform vec2 screenOffset;" << "\n";
+////    vs << "layout(location = 4) uniform vec2 screenOffset;" << "\n";
 
-    vs << "void main(void)" << "\n";
-    vs << "{" << "\n";
-    vs << "    ex_Color = in_Color;" << "\n";
-    vs << "    gl_Position = vec4(in_Position, 1.0);" << "\n";
-    vs << "}" << "\n";
+//    vs << "void main(void)" << "\n";
+//    vs << "{" << "\n";
+//    vs << "    ex_Color = in_Color;" << "\n";
+//    vs << "    gl_Position = vec4(in_Position, 1.0);" << "\n";
+//    vs << "}" << "\n";
+
+    auto inputStream = std::ifstream("defaultVertexShader.vert", std::ifstream::in);
+    char c;
+    while(inputStream.get(c)){
+        vs << c;
+    }
+    inputStream.close();
 
     vertexShaderString = vs.str();
 }
@@ -29,22 +42,29 @@ void setVertexShader() {
 
 void setFragmentShader() {
     std::stringstream fs;
-    fs << "#version 130" << "\n";
+//    fs << "#version 130" << "\n";
 
-    fs << "precision highp float; // needed only for version 1.30" << "\n";
+//    fs << "precision highp float; // needed only for version 1.30" << "\n";
 
-    fs << "in  vec3 ex_Color;" << "\n";
-    fs << "out vec4 out_Color;" << "\n";
+//    fs << "in  vec3 ex_Color;" << "\n";
+//    fs << "out vec4 out_Color;" << "\n";
 
-    fs << "void main(void)" << "\n";
-    fs << "{" << "\n";
-    fs << "    out_Color = vec4(ex_Color, 1.0);" << "\n";
+//    fs << "void main(void)" << "\n";
+//    fs << "{" << "\n";
+//    fs << "    out_Color = vec4(ex_Color, 1.0);" << "\n";
 
-    // Try replacing the above with the following:
-    //vec3 tmp_Color;
-    //tmp_Color = ex_Color.rrr;
-    //out_Color = vec4(tmp_Color,1.0);
-    fs << "}" << "\n";
+//    // Try replacing the above with the following:
+//    //vec3 tmp_Color;
+//    //tmp_Color = ex_Color.rrr;
+//    //out_Color = vec4(tmp_Color,1.0);
+//    fs << "}" << "\n";
+
+    auto inputStream = std::ifstream("defaultVertexShader.frag", std::ifstream::in);
+    char c;
+    while(inputStream.get(c)){
+        fs << c;
+    }
+    inputStream.close();
 
     fragmentShaderString = fs.str();
 }
@@ -119,8 +139,25 @@ bool setShaders() {
 
     glUseProgram(shaderProgram);
 
+    ProjLocation = glGetUniformLocation(shaderProgram, "Proj");
+    ViewLocation = glGetUniformLocation(shaderProgram, "View");
+    WorldLocation = glGetUniformLocation(shaderProgram, "World");
+
     return true;
 }
+
+void setProjMatrix(float* projPointer){
+    glUniformMatrix4fv(ProjLocation, 1, GL_FALSE, projPointer);
+}
+
+void setViewMatrix(float* viewPointer){
+    glUniformMatrix4fv(ViewLocation, 1, GL_FALSE, viewPointer);
+}
+
+void setWorldMatrix(float* worldPointer){
+    glUniformMatrix4fv(WorldLocation, 1, GL_FALSE, worldPointer);
+}
+
 
 void useShader() {
     glUseProgram(shaderProgram);

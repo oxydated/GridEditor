@@ -46,7 +46,25 @@ set(PROJECT_SOURCES
         mathtools.h
         draggable.cpp
         draggable.h
+        camera.cpp
+        camera.h
+        defaultVertexShader.vert
+        defaultVertexShader.frag
 )
+
+set(SOURCE_FILE_VERT ${CMAKE_SOURCE_DIR}/defaultVertexShader.vert)
+set(SOURCE_FILE_FRAG ${CMAKE_SOURCE_DIR}/defaultVertexShader.frag)
+set(DESTINATION_DIR ${CMAKE_BINARY_DIR})
+
+add_custom_command(
+    OUTPUT ${DESTINATION_DIR}/defaultVertexShader.vert ${DESTINATION_DIR}/defaultVertexShader.frag
+    COMMAND ${CMAKE_COMMAND} -E copy ${SOURCE_FILE_VERT} ${DESTINATION_DIR}/defaultVertexShader.vert
+    COMMAND ${CMAKE_COMMAND} -E copy ${SOURCE_FILE_FRAG} ${DESTINATION_DIR}/defaultVertexShader.frag
+    DEPENDS ${SOURCE_FILE_VERT} ${SOURCE_FILE_FRAG}
+    COMMENT "Copying defaultVertexShader.vert to build directory"
+)
+
+add_custom_target(copy_myfile ALL DEPENDS ${DESTINATION_DIR}/defaultVertexShader.vert ${DESTINATION_DIR}/defaultVertexShader.frag)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(GridEditor
@@ -70,6 +88,9 @@ else()
         )
     endif()
 endif()
+
+find_package(glm REQUIRED)
+target_link_libraries(GridEditor PRIVATE glm)
 
 target_link_libraries(GridEditor PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 target_link_libraries(GridEditor PRIVATE ${X11_LIBRARIES})

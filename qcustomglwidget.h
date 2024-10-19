@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QDebug>
+#include <QEvent>
 #include <unistd.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -29,6 +30,7 @@ protected:
     virtual void mouseReleaseEvent(QMouseEvent *event);
     virtual void mousePressEvent(QMouseEvent *event);
     virtual void mouseMoveEvent(QMouseEvent *event);
+    virtual void wheelEvent(QWheelEvent *event);
     void keyPressEvent(QKeyEvent *event);
     virtual void resizeEvent(QResizeEvent *event);
 
@@ -38,6 +40,7 @@ private:
     void zoom(float x, float y);
     void updateViewport();
     std::array<float, 2> convertCoordinates(float x, float y);
+    std::array<float, 2> convertCoordinates(QMouseEvent *event);
 
     Display* m_display;
 

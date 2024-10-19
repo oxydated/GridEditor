@@ -13,6 +13,8 @@
 #include "curvepiece.h"
 #include "curvebuilder.h"
 #include "mathtools.h"
+#include "camera.h"
+#include "memory"
 
 QCustomGLWidget::QCustomGLWidget(QWidget *parent)
     : QWidget{parent}
@@ -178,7 +180,14 @@ void QCustomGLWidget::initializeGL(){
     DrawableManager::init();
 
     setShaders();
-    updateViewport();
+    //updateViewport();
+    std::array<float, 3> camPos({0.0, 0.0, 1.0});
+    std::array<float, 3> camTarget({0.0, 0.0, 0.0});
+    camera::setCurrentCamera(std::make_shared<camera>(camPos, camTarget));
+    QRect winRect = geometry();
+    int width = winRect.width();
+    int height = winRect.height();
+    camera::updateCurrentCamera(float(width), float(height));
 
     glClearColor(0.0f, 0.0f, 0.5f, 1.0f);
     glClearDepth(1.0);
@@ -203,8 +212,8 @@ void QCustomGLWidget::closeEvent(QCloseEvent *event){
     QWidget::closeEvent(event);
 }
 
-void QCustomGLWidget::paintEvent(QPaintEvent *event){
-
+void QCustomGLWidget::paintEvent(QPaintEvent *event){    
+    updateViewport();
     glClearColor(0.5f, 0.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 for(int i = 0; i < 2; i++){
@@ -217,31 +226,42 @@ for(int i = 0; i < 2; i++){
 
 void QCustomGLWidget::mouseMoveEvent(QMouseEvent *event){
     if(event->buttons() == Qt::RightButton){
-        qreal x = event->position().rx();
-        qreal y = event->position().ry();
-        auto pointXY = convertCoordinates(x, y);
-        DragManager::onMouseMove(pointXY[0], pointXY[1]);
+        auto pointXY = convertCoordinates(event);
+
+        auto modification = QGuiApplication::keyboardModifiers();
+        if(modification == Qt::ShiftModifier){
+            camera::onMouseMove(pointXY[0], pointXY[1]);
+        }else
+        {
+            DragManager::onMouseMove(pointXY[0], pointXY[1]);
+        }
         update();
     }
 }
 
+void QCustomGLWidget::wheelEvent(QWheelEvent *event){
+    camera::wheelEvent(event->angleDelta().y());
+    update();
+}
+
 void QCustomGLWidget::mousePressEvent(QMouseEvent *event){
     if(event->button() == Qt::RightButton){
-        qreal x = event->position().rx();
-        qreal y = event->position().ry();
-        auto pointXY = convertCoordinates(x, y);
-        DragManager::onMouseDown(pointXY[0], pointXY[1]);
+        auto pointXY = convertCoordinates(event);
+
+        auto modification = QGuiApplication::keyboardModifiers();
+        if(modification == Qt::ShiftModifier){
+            camera::onMouseDown(pointXY[0], pointXY[1]);
+        }else
+        {
+            DragManager::onMouseDown(pointXY[0], pointXY[1]);
+        }
         update();
     }
 }
 
 void QCustomGLWidget::mouseReleaseEvent(QMouseEvent *event){
     if(event->button() == Qt::LeftButton){
-
-        qreal x = event->position().rx();
-        qreal y = event->position().ry();
-
-        auto pointXY = convertCoordinates(x, y);
+        auto pointXY = convertCoordinates(event);
 
         if(CurveBuilder::willBuildCurve()){
             CurveBuilder::onClick(pointXY[0], pointXY[1], this);
@@ -250,9 +270,7 @@ void QCustomGLWidget::mouseReleaseEvent(QMouseEvent *event){
     }
 
     if(event->button() == Qt::RightButton){
-        qreal x = event->position().rx();
-        qreal y = event->position().ry();
-        auto pointXY = convertCoordinates(x, y);
+        auto pointXY = convertCoordinates(event);
         DragManager::onMouseUp(pointXY[0], pointXY[1]);
         update();
     }
@@ -273,27 +291,27 @@ void QCustomGLWidget::resizeEvent(QResizeEvent *event){
 void QCustomGLWidget::updateViewport(){
     QRect winRect = geometry();
     int width = winRect.width();
-    int height = winRect.height();
-    int max = height > width? height: width;
-    int x = (width - max)/2;
-    int y = (height - max)/2;
-    glViewport(x, y, max, max);
+    int height = winRect.height();    
+    camera::updateCurrentCamera(float(width), float(height));
 
     auto ori = convertCoordinates(0., 0.);
     auto dest = convertCoordinates(0., 10.);
     DrawableManager::setMinDistance(std::sqrt(std::pow(dest[0] - ori[0],2) + std::pow(dest[1] - ori[1],2)));
 }
 
-std::array<float, 2> QCustomGLWidget::convertCoordinates(float x, float y){
+std::array<float, 2> QCustomGLWidget::convertCoordinates(float xw, float yw){
     QRect winRect = geometry();
     int width = winRect.width();
     int height = winRect.height();
 
-    y = float(height) - y;
+    float px = 2.0*(xw - (float(width)/2.0 - float(height)/2.0))/float(height) - 1.0;
+    float py = 2.0 *(float(height) - yw)/float(height) - 1.0;
 
-    int max = height > width? height: width;
-
-    float px = (x - float(width)/2.0) * (2.0/float(max));
-    float py = (y - float(height)/2.0) * (2.0/float(max));
     return {px, py};
+}
+
+std::array<float, 2> QCustomGLWidget::convertCoordinates(QMouseEvent *event){
+    qreal x = event->position().rx();
+    qreal y = event->position().ry();
+    return convertCoordinates(x, y);
 }
