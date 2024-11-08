@@ -92,7 +92,7 @@ void curvePiece::setToDrag(){
 
 void curvePiece::draw(){
     float a = 0;
-    int steps = 25;
+    int steps = 5;
 
     bool firstDraw = (index == -1);
 

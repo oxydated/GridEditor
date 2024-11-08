@@ -48,6 +48,8 @@ set(PROJECT_SOURCES
         draggable.h
         camera.cpp
         camera.h
+        curverepository.cpp
+        curverepository.h
         defaultVertexShader.vert
         defaultVertexShader.frag
 )

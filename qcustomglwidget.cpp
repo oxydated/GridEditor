@@ -32,6 +32,25 @@ void QCustomGLWidget::initializeGL(){
 
     auto nearest = nearestPointInCurve(1, -2, 1.5, -3, 2, -2, 0, -1, 1.1, -1.9);
 
+    float length = bezierLength(1, -2, 1.5, -3, 2, -2, 0, -1);
+
+    float lengtha = bezierIntervalLength(1, -2, 1.5, -3, 2, -2, 0, -1, 0.0, 0.5);
+
+    float lengthb = bezierIntervalLength(1, -2, 1.5, -3, 2, -2, 0, -1, 0.5, 0.75);
+
+    float lengthc = bezierIntervalLength(1, -2, 1.5, -3, 2, -2, 0, -1, 0.75, 1.0);
+
+    float lengthS = lengtha + lengthb + lengthc;
+
+    float tenthLength = lengthS / 10.0;
+
+    float tenthlengthTimes5 = tenthLength * 5.0;
+
+    float tenthParameter = bezierParameterForLength(1, -2, 1.5, -3, 2, -2, 0, -1, tenthlengthTimes5);
+
+    float tenthLenghtAgain = bezierIntervalLength(1, -2, 1.5, -3, 2, -2, 0, -1, 0.0, tenthParameter);
+
+
     setAttribute(Qt::WA_PaintOnScreen, true);
     setAttribute(Qt::WA_OpaquePaintEvent, true);
 

@@ -26,4 +26,12 @@ std::array<float, 8> cutPieceAfter(float x0, float y0, float x1, float y1, float
 std::array<float, 4>tangentVectorsAtBoundaries(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3);
 
 
+float bezierSimpsonsRule(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3, float a, float b);
+
+float bezierLength(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3);
+
+float bezierIntervalLength(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3, float sI, float eI);
+
+float bezierParameterForLength(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3, float length);
+
 #endif // MATHTOOLS_H

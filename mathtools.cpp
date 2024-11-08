@@ -282,3 +282,72 @@ std::array<float, 8> cutPieceAfter(float x0, float y0, float x1, float y1, float
 std::array<float, 4>tangentVectorsAtBoundaries(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3){
     return {-3*(x0 - x1), -3*(y0 - y1), -3*(x2 - x3), -3*(y2 - y3)};
 }
+
+float bezierSimpsonsRule(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3, float a, float b){
+    auto func = [=](float t){
+        return 3*std::sqrt(
+                std::pow(-x0 + x1 + 2*t*(x0 - 2*x1 + x2) + std::pow(t,2)*(-x0 + 3*x1 - 3*x2 + x3),2) +
+                std::pow(-y0 + y1 + 2*t*(y0 - 2*y1 + y2) + std::pow(t,2)*(-y0 + 3*y1 - 3*y2 + y3),2)
+                );
+    };
+    return -((a - b)*(func(a) + func(b) + 4*func((a + b)/2.)))/6.;
+}
+
+float bezierLength(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3){
+    const int n = 10;
+    const float delta = 1.0/float(n);
+
+    float length = 0.0;
+    for(int i = 0; i < n; i++){
+        float a = float(i)* delta;
+        float b = a + delta;
+        length += bezierSimpsonsRule(x0, y0, x1, y1, x2, y2, x3, y3, a, b);
+    }
+    return length;
+}
+
+float bezierIntervalLength(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3, float sI, float eI){
+    const int n = 10;
+    const float delta = (eI - sI)/float(n);
+
+    float length = 0.0;
+    for(int i = 0; i < n; i++){
+        float a = sI + float(i)* delta;
+        float b = a + delta;
+        length += bezierSimpsonsRule(x0, y0, x1, y1, x2, y2, x3, y3, a, b);
+    }
+    return length;
+}
+
+float bezierParameterForLength(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3, float length){
+    float totalLength = bezierLength(x0, y0, x1, y1, x2, y2, x3, y3);
+    if(length > totalLength){
+        return NAN;
+    }
+    float tol = 0.0001;
+    if(std::fabs(totalLength - length) < tol){
+        return 1.0;
+    }
+    if(std::fabs(length) < tol){
+        return 0.0;
+    }
+
+    float lengthSI = 0;
+    float sI = 0.0;
+    float eI = 1.0;
+    float middle = 0.5;
+    float lengthMiddle = lengthSI + bezierIntervalLength(x0, y0, x1, y1, x2, y2, x3, y3, sI, middle);
+    while( std::fabs(lengthMiddle - length) > tol){
+        if(lengthMiddle > length){
+            eI = middle;
+        }else{
+            lengthSI = lengthMiddle;
+            sI = middle;
+        }
+        middle = sI + (eI-sI)/2.0;
+        lengthMiddle = lengthSI + bezierIntervalLength(x0, y0, x1, y1, x2, y2, x3, y3, sI, middle);
+    }
+    return middle;
+}
+
+
